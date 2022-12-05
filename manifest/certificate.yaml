@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: feedback-cert
+spec:
+  domains:
+    - feedback.star-lord.jp

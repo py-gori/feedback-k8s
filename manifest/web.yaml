@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: feedback-web
+  labels:
+    app: feedback-web
+  annotations:
+    cloud.google.com/backend-config: '{"default": "feedback-backendconfig"}'
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3000
+  selector:
+    app: feedback-web
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feedback-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: feedback-web
+  template:
+    metadata:
+      labels:
+        app: feedback-web
+    spec:
+      containers:
+        - name: feedback-web
+          image: gcr.io/$PROJECT_ID/feedback_web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 30

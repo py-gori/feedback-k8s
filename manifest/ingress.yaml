@@ -1,0 +1,55 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: feedback-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: feedback-globalip
+    networking.gke.io/managed-certificates: feedback-cert
+    kubernetes.io/ingress.class: "gce"
+    cloud.google.com/neg: '{"ingress": true}'
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  defaultBackend:
+    service:
+      name: feedback-web
+      port:
+        number: 80
+  rules:
+    - http:
+        paths:
+          - path: /posts/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: feedback-web
+                port:
+                  number: 80
+          - path: /api/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: feedback-app
+                port:
+                  number: 8080
+          - path: /admin/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: feedback-app
+                port:
+                  number: 8080
+          - path: /staticfiles/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: feedback-app
+                port:
+                  number: 8080
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: feedback-backendconfig
+spec:
+  securityPolicy:
+    name: feedback-policy
